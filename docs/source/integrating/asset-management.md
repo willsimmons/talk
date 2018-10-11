@@ -250,7 +250,6 @@ module.exports = router => {
 };
 ```
 
-
 As you can see from the previous step of [Creating a New Asset Route](#Creating%20a%20New%20Asset%20Route)
 , we have added the new `PUT` route to the router. This is a simple addition
 that allows your CMS to call into Talk when the asset has updated it's title,
