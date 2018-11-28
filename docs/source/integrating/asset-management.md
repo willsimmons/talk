@@ -25,7 +25,6 @@ more strict control over this flow, we will create a plugin that will:
 
 We will then modify our embed so that we can [Target the Asset](#Target%20the%20Asset).
 
-
 But first we should grab our basic plugin structure:
 
 ```sh
