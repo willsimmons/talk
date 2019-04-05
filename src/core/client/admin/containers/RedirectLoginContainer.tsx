@@ -2,18 +2,15 @@ import { Match, Router, withRouter } from "found";
 import React from "react";
 
 import { RedirectLoginContainerQueryResponse } from "talk-admin/__generated__/RedirectLoginContainerQuery.graphql";
-import {
-  SetRedirectPathMutation,
-  withSetRedirectPathMutation,
-} from "talk-admin/mutations";
-import { graphql } from "talk-framework/lib/relay";
+import { SetRedirectPathMutation } from "talk-admin/mutations";
+import { graphql, MutationProp, withMutation } from "talk-framework/lib/relay";
 import { withRouteConfig } from "talk-framework/lib/router";
 import { GQLUSER_ROLE } from "talk-framework/schema";
 
 interface Props {
   match: Match;
   router: Router;
-  setRedirectPath: SetRedirectPathMutation;
+  setRedirectPath: MutationProp<typeof SetRedirectPathMutation>;
   data: RedirectLoginContainerQueryResponse | null;
 }
 
@@ -98,6 +95,6 @@ const enhanced = withRouteConfig({
       }
     }
   `,
-})(withRouter(withSetRedirectPathMutation(RedirectLoginContainer)));
+})(withRouter(withMutation(SetRedirectPathMutation)(RedirectLoginContainer)));
 
 export default enhanced;
