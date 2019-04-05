@@ -301,6 +301,19 @@ export async function createUserIndexes(mongo: Db) {
     tenantID: 1,
     role: 1,
   });
+
+  // Suspension based User Connection pagination.
+  await variants(createIndex, {
+    tenantID: 1,
+    "status.suspension.history.from.start": 1,
+    "status.suspension.history.from.finish": 1,
+  });
+
+  // Ban based User Connection pagination.
+  await variants(createIndex, {
+    tenantID: 1,
+    "status.banned.active": 1,
+  });
 }
 
 function hashPassword(password: string): Promise<string> {
@@ -523,7 +536,7 @@ export async function updateUserPassword(
       throw new LocalProfileNotSetError();
     }
 
-    throw new Error("an unexpected error occured");
+    throw new Error("an unexpected error occurred");
   }
 
   return result.value || null;
@@ -575,7 +588,7 @@ export async function setUserUsername(
       throw new UsernameAlreadySetError();
     }
 
-    throw new Error("an unexpected error occured");
+    throw new Error("an unexpected error occurred");
   }
 
   return result.value;
@@ -621,7 +634,7 @@ export async function updateUserUsername(
       throw new UserNotFoundError(id);
     }
 
-    throw new Error("an unexpected error occured");
+    throw new Error("an unexpected error occurred");
   }
 
   return result.value;
@@ -683,7 +696,7 @@ export async function setUserEmail(
       throw new UsernameAlreadySetError();
     }
 
-    throw new Error("an unexpected error occured");
+    throw new Error("an unexpected error occurred");
   }
 
   return result.value;
@@ -739,7 +752,7 @@ export async function updateUserEmail(
       throw new UserNotFoundError(id);
     }
 
-    throw new Error("an unexpected error occured");
+    throw new Error("an unexpected error occurred");
   }
 
   return result.value;
@@ -786,7 +799,7 @@ export async function updateUserAvatar(
       throw new UserNotFoundError(id);
     }
 
-    throw new Error("an unexpected error occured");
+    throw new Error("an unexpected error occurred");
   }
 
   return result.value;
@@ -863,7 +876,7 @@ export async function setUserLocalProfile(
       throw new LocalProfileAlreadySetError();
     }
 
-    throw new Error("an unexpected error occured");
+    throw new Error("an unexpected error occurred");
   }
 
   return result.value;
@@ -940,7 +953,7 @@ export async function deactivateUserToken(
       throw new TokenNotFoundError();
     }
 
-    throw new Error("an unexpected error occured");
+    throw new Error("an unexpected error occurred");
   }
 
   // We have to typecast here because we know at this point that the record does
@@ -1051,7 +1064,7 @@ export async function banUser(
       throw new UserAlreadyBannedError();
     }
 
-    throw new Error("an unexpected error occured");
+    throw new Error("an unexpected error occurred");
   }
 
   return result.value;
@@ -1203,7 +1216,7 @@ export async function suspendUser(
       throw new UserAlreadySuspendedError(suspended.until);
     }
 
-    throw new Error("an unexpected error occured");
+    throw new Error("an unexpected error occurred");
   }
 
   return result.value;
