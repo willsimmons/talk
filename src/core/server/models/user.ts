@@ -16,7 +16,7 @@ import {
   UserNotFoundError,
 } from "talk-server/errors";
 import {
-  GQLBannedStatus,
+  GQLBanStatus,
   GQLSuspensionStatus,
   GQLTimeRange,
   GQLUSER_ROLE,
@@ -136,9 +136,9 @@ export interface SuspensionStatus {
 }
 
 /**
- * BannedStatusHistory is the list of all ban events against a specific User.
+ * BanStatusHistory is the list of all ban events against a specific User.
  */
-export interface BannedStatusHistory {
+export interface BanStatusHistory {
   /**
    * id is a specific reference for a particular banned status that will be
    * used internally to update banned records.
@@ -163,9 +163,9 @@ export interface BannedStatusHistory {
 }
 
 /**
- * BannedStatus contains information about a ban for a given User.
+ * BanStatus contains information about a ban for a given User.
  */
-export interface BannedStatus {
+export interface BanStatus {
   /**
    * active when true, indicates that the given user is banned.
    */
@@ -174,7 +174,7 @@ export interface BannedStatus {
   /**
    * history is the list of all ban events against a specific User.
    */
-  history: BannedStatusHistory[];
+  history: BanStatusHistory[];
 }
 
 /**
@@ -188,9 +188,9 @@ export interface UserStatus {
   suspension: SuspensionStatus;
 
   /**
-   * banned stores the user banned status as well as the history of changes.
+   * ban stores the user ban status as well as the history of changes.
    */
-  banned: BannedStatus;
+  ban: BanStatus;
 }
 
 /**
@@ -312,7 +312,7 @@ export async function createUserIndexes(mongo: Db) {
   // Ban based User Connection pagination.
   await variants(createIndex, {
     tenantID: 1,
-    "status.banned.active": 1,
+    "status.ban.active": 1,
   });
 }
 
@@ -342,7 +342,7 @@ export async function upsertUser(
     tokens: [],
     status: {
       suspension: { history: [] },
-      banned: { active: false, history: [] },
+      ban: { active: false, history: [] },
     },
     createdAt: now,
   };
@@ -1021,7 +1021,7 @@ export async function banUser(
   now = new Date()
 ) {
   // Create the new ban.
-  const ban: BannedStatusHistory = {
+  const banHistory: BanStatusHistory = {
     id: uuid(),
     active: true,
     createdBy,
@@ -1033,16 +1033,16 @@ export async function banUser(
     {
       id,
       tenantID,
-      "status.banned.active": {
+      "status.ban.active": {
         $ne: true,
       },
     },
     {
       $set: {
-        "status.banned.active": true,
+        "status.ban.active": true,
       },
       $push: {
-        "status.banned.history": ban,
+        "status.ban.history": banHistory,
       },
     },
     {
@@ -1059,8 +1059,8 @@ export async function banUser(
     }
 
     // Check to see if the user is already banned.
-    const banned = consolidateUserBannedStatus(user.status.banned);
-    if (banned.active) {
+    const ban = consolidateUserBanStatus(user.status.ban);
+    if (ban.active) {
       throw new UserAlreadyBannedError();
     }
 
@@ -1088,7 +1088,7 @@ export async function removeUserBan(
   now = new Date()
 ) {
   // Create the new ban.
-  const ban: BannedStatusHistory = {
+  const ban: BanStatusHistory = {
     id: uuid(),
     active: false,
     createdBy,
@@ -1102,12 +1102,12 @@ export async function removeUserBan(
       tenantID,
       $or: [
         {
-          "status.banned.active": {
+          "status.ban.active": {
             $ne: false,
           },
         },
         {
-          "status.banned.history": {
+          "status.ban.history": {
             $size: 0,
           },
         },
@@ -1115,10 +1115,10 @@ export async function removeUserBan(
     },
     {
       $set: {
-        "status.banned.active": false,
+        "status.ban.active": false,
       },
       $push: {
-        "status.banned.history": ban,
+        "status.ban.history": ban,
       },
     },
     {
@@ -1285,13 +1285,13 @@ export async function removeActiveUserSuspensions(
   return result.value;
 }
 
-export type ConsolidatedBannedStatus = Omit<GQLBannedStatus, "history"> &
-  Pick<BannedStatus, "history">;
+export type ConsolidatedBanStatus = Omit<GQLBanStatus, "history"> &
+  Pick<BanStatus, "history">;
 
-export function consolidateUserBannedStatus(
-  banned: User["status"]["banned"]
-): ConsolidatedBannedStatus {
-  return banned;
+export function consolidateUserBanStatus(
+  ban: User["status"]["ban"]
+): ConsolidatedBanStatus {
+  return ban;
 }
 
 export type ConsolidatedSuspensionStatus = Omit<
@@ -1327,7 +1327,7 @@ export function consolidateUserSuspensionStatus(
 
 export interface ConsolidatedUserStatus {
   suspension: ConsolidatedSuspensionStatus;
-  banned: ConsolidatedBannedStatus;
+  ban: ConsolidatedBanStatus;
 }
 
 export function consolidateUserStatus(
@@ -1337,6 +1337,6 @@ export function consolidateUserStatus(
   // Return the status.
   return {
     suspension: consolidateUserSuspensionStatus(status.suspension, now),
-    banned: consolidateUserBannedStatus(status.banned),
+    ban: consolidateUserBanStatus(status.ban),
   };
 }
