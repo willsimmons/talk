@@ -34,8 +34,7 @@ const BanModal: StatelessComponent<Props> = ({
           <HorizontalGutter>
             <Typography variant="header2" id="banModal-title">
               Are you sure you want to ban{" "}
-              <strong>{username || <NotAvailable />}</strong>
-              ?
+              <strong>{username || <NotAvailable />}</strong>?
             </Typography>
             <Typography>
               Once banned, this user will no longer be able to comment, use
